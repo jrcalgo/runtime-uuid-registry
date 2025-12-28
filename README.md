@@ -61,7 +61,8 @@ let clear_res: Result<(), UuidPoolError> = clear_all();
 | `remove(context, uuid)` | Remove a UUID from a context (returns `Result`) |
 | `try_remove(context, uuid)` | Remove a UUID from a context (returns `bool`) |
 | `replace(context, old, new)` | Replace one UUID with another in a context |
-| `clear()` | Remove all UUIDs from all contexts |
+| `clear_context(context)` | Remove all UUIDS from a specific context |
+| `clear_all()` | Remove all UUIDs from all contexts |
 
 ## License
 
