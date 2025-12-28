@@ -27,7 +27,7 @@ enum GlobalUuidPool {
 }
 
 // Thread-safe UUID pool using Mutex
-pub(crate) static GLOBAL_UUID_POOL: OnceLock<GlobalUuidPool> = OnceLock::new();
+static GLOBAL_UUID_POOL: OnceLock<GlobalUuidPool> = OnceLock::new();
 
 fn global_pool() -> &'static GlobalUuidPool {
     GLOBAL_UUID_POOL.get_or_init(|| {
@@ -109,6 +109,20 @@ fn remove(context: &str, uuid: Uuid) -> bool {
     }
 }
 
+fn clear_context(context: &str) {
+    match global_pool() {
+        #[cfg(not(feature = "concurrent"))]
+        GlobalUuidPool::SingleThreaded(pool) => {
+            let mut map = pool.lock();
+            map.remove(context);
+        }
+        #[cfg(feature = "concurrent")]
+        GlobalUuidPool::Concurrent(pool) => {
+            pool.remove(context);
+        }
+    }
+}
+
 fn clear_all() {
     match global_pool() {
         #[cfg(not(feature = "concurrent"))]
@@ -139,9 +153,9 @@ pub(crate) fn random_uuid(
     let new_uuid = make_uuid_with_base(base);
 
     if try_insert(context, new_uuid) {
-        return Ok(new_uuid);
+        Ok(new_uuid)
     } else {
-        return random_uuid(context, base, max_retries, retry_count + 1);
+        random_uuid(context, base, max_retries, retry_count + 1)
     }
 }
 
@@ -204,7 +218,12 @@ pub(crate) fn set_uuid_in_pool(
     Ok(())
 }
 
-pub(crate) fn drain_uuid_pool() -> Result<(), UuidPoolError> {
+pub(crate) fn drain_context(context: &str) -> Result<(), UuidPoolError> {
+    clear_context(context);
+    Ok(())
+}
+
+pub(crate) fn drain_all_contexts() -> Result<(), UuidPoolError> {
     clear_all();
     Ok(())
 }

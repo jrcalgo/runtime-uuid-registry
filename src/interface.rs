@@ -41,6 +41,11 @@ pub fn replace(context: &str, old_uuid: Uuid, new_uuid: Uuid) -> Result<(), Uuid
 }
 
 #[inline(always)]
-pub fn clear() -> Result<(), UuidPoolError> {
-    crate::registry::drain_uuid_pool()
+pub fn clear_context(context: &str) -> Result<(), UuidPoolError> {
+    crate::registry::drain_context(context)
+}
+
+#[inline(always)]
+pub fn clear_all() -> Result<(), UuidPoolError> {
+    crate::registry::drain_all_contexts()
 }
