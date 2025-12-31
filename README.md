@@ -45,7 +45,7 @@ let new = Uuid::...; // create your UUID here
 let replace_res: Result<(), UuidPoolError> = replace("server", old, new);
 
 // Get all UUIDs for any given context
-let ids: Result<Vec<(String, Uuid)>, UuidPoolError> = get(context);
+let ids: Result<Vec<(String, Uuid)>, UuidPoolError> = get("server");
 
 // Clear all UUIDs from a certain context
 let clear_res: Result<(), UuidPoolError> = clear_context("server");
