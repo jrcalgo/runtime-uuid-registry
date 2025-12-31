@@ -14,5 +14,3 @@ pub enum UuidPoolError {
     #[error("Failed to set UUID in pool: {0}")]
     FailedToSetUuidInPoolError(String),
 }
-
-use interface::*;

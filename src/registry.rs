@@ -1,10 +1,9 @@
 use super::UuidPoolError;
 
 use rand::Rng;
-use std::{
-    collections::{HashMap, HashSet},
-    sync::{Arc, OnceLock},
-};
+use std::sync::{Arc, OnceLock};
+#[cfg(not(feature = "concurrent"))]
+use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
 #[cfg(feature = "concurrent")]
@@ -189,7 +188,7 @@ pub(crate) fn remove_uuid_from_pool(context: &str, uuid: &Uuid) -> Result<(), Uu
     }
 }
 
-pub(crate) fn set_uuid_in_pool(
+pub(crate) fn replace_uuid_in_pool(
     context: &str,
     old_uuid: &Uuid,
     new_uuid: &Uuid,
@@ -216,6 +215,20 @@ pub(crate) fn set_uuid_in_pool(
     }
 
     Ok(())
+}
+
+pub(crate) fn get_context_uuids_from_pool(context: &str) -> Result<Vec<(String, Uuid)>, UuidPoolError> {
+    match global_pool() {
+        #[cfg(not(feature = "concurrent"))]
+        GlobalUuidPool::SingleThreaded(pool) => {
+            let map = pool.lock();
+            map.get(context).map(|set| set.clone().iter().map(|uuid| (context.to_string(), *uuid)).collect()).ok_or(UuidPoolError::FailedToFindUuidInPoolError(format!("Failed to find UUIDs in pool for context '{}'", context)))
+        }
+        #[cfg(feature = "concurrent")]
+        GlobalUuidPool::Concurrent(pool) => {
+            pool.get(context).map(|set| set.value().clone().iter().map(|uuid| (context.to_string(), *uuid)).collect()).ok_or(UuidPoolError::FailedToFindUuidInPoolError(format!("Failed to find UUIDs in pool for context '{}'", context)))
+        }
+    }
 }
 
 pub(crate) fn drain_context(context: &str) -> Result<(), UuidPoolError> {

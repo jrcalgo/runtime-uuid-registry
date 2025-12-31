@@ -37,7 +37,12 @@ pub fn try_remove(context: &str, uuid: Uuid) -> bool {
 
 #[inline(always)]
 pub fn replace(context: &str, old_uuid: Uuid, new_uuid: Uuid) -> Result<(), UuidPoolError> {
-    crate::registry::set_uuid_in_pool(context, &old_uuid, &new_uuid)
+    crate::registry::replace_uuid_in_pool(context, &old_uuid, &new_uuid)
+}
+
+#[inline(always)]
+pub fn get(context: &str) -> Result<Vec<(String, Uuid)>, UuidPoolError> {
+    crate::registry::get_context_uuids_from_pool(context)
 }
 
 #[inline(always)]
