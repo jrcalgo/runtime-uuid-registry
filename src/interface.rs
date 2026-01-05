@@ -46,6 +46,11 @@ pub fn get(context: &str) -> Result<Vec<(String, Uuid)>, UuidPoolError> {
 }
 
 #[inline(always)]
+pub fn get_all() -> Result<Vec<(String, Uuid)>, UuidPoolError> {
+    crate::registry::get_all_contexts_uuids_from_pool()
+}
+
+#[inline(always)]
 pub fn clear_context(context: &str) -> Result<(), UuidPoolError> {
     crate::registry::drain_context(context)
 }
