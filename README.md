@@ -8,21 +8,21 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-active-uuid-registry = "0.2.0"
+active-uuid-registry = "0.3.0"
 ```
 
 By default, the registry uses a mutex-protected hashmap of arc<str> and hashsets.
-For concurrent access with DashMap/DashSet, enable the `concurrent` feature:
+For concurrent access with DashMap/DashSet, enable the `concurrent-map` feature:
 
 ```toml
 [dependencies]
-active-uuid-registry = { version = "0.2.0", features = ["concurrent"] }
+active-uuid-registry = { version = "0.3.0", features = ["concurrent-map"] }
 ```
 
 ## Usage
 
 ```rust
-use active_uuid_registry::interface::{reserve, add, remove, try_remove, replace, clear};
+use active_uuid_registry::interface::{reserve, add, remove, try_remove, replace, get, get_all, clear_context, clear_all};
 use active_uuid_registry::UuidPoolError;
 use uuid::Uuid;
 
@@ -47,6 +47,9 @@ let replace_res: Result<(), UuidPoolError> = replace("server", old, new);
 // Get all UUIDs for any given context
 let ids: Result<Vec<(String, Uuid)>, UuidPoolError> = get("server");
 
+// Get all UUIDs currently stored
+let all_ids: Result<Vec<(String, Uuid)>, UuidPoolError> = get_all();
+
 // Clear all UUIDs from a certain context
 let clear_res: Result<(), UuidPoolError> = clear_context("server");
 
@@ -66,9 +69,10 @@ let clear_res: Result<(), UuidPoolError> = clear_all();
 | `try_remove(context, uuid)` | Remove a UUID from a context (returns `bool`) |
 | `replace(context, old, new)` | Replace one UUID with another in a context |
 | `get(context)` | Get all UUIDs stored for a specific context |
+| `get_all()` | Get all UUIDs stored | 
 | `clear_context(context)` | Remove all UUIDS from a specific context |
 | `clear_all()` | Remove all UUIDs from all contexts |
 
 ## License
 
-MIT
+[MIT](LICENSE)
